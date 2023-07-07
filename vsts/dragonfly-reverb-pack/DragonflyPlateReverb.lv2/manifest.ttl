@@ -1,0 +1,14 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ui:   <http://lv2plug.in/ns/extensions/ui#> .
+
+<urn:dragonfly:plate>
+    a lv2:Plugin ;
+    lv2:binary <DragonflyPlateReverb_dsp.so> ;
+    rdfs:seeAlso <DragonflyPlateReverb_dsp.ttl> .
+
+<urn:dragonfly:plate#DPF_UI>
+    a ui:X11UI ;
+    ui:binary <DragonflyPlateReverb_ui.so> ;
+    rdfs:seeAlso <DragonflyPlateReverb_ui.ttl> .
+
