@@ -1,5 +1,4 @@
 # VST Server
-============
 
 Host audio VSTs and audio processing on a web server.
 
