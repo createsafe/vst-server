@@ -5,14 +5,12 @@ import uvicorn
 from fastapi import FastAPI, File, HTTPException, UploadFile, Header, Form
 from fastapi.responses import HTMLResponse
 
-from effects.effects import process_audio_with_effect
+from effects.effects import process_audio_with_effect_chain
 from plugins.utils import get_plugin_parameters
 from lib import load_audio
 
 app = FastAPI()
-
 PORT = os.environ.get("PORT", 8080)
-
 
 class EffectSetting(BaseModel):
     name: str
@@ -21,20 +19,15 @@ class EffectSetting(BaseModel):
 
 @app.post("/apply_effect/{effect_name}")
 async def apply_effect(
-    effect_name: str,
-    file: UploadFile = File(...),
-    Authorization: str = Header(None),
-    user_setting: str = Form(None),
-    metadata: str = Form(),
+    audio_file: UploadFile,
+    effects_file: UploadFile
 ):
-    # token = Authorization.split(" ")[-1]
-    # verify_token(token)
-
-    metadata_dict = json.loads(metadata) if metadata else {}
 
     try:
-        y, sr, duration, did_truncate = await load_audio(file.file, max_duration=500)
-        y_processed = await process_audio_with_effect(y, sr, effect_name, user_setting, metadata_dict)
+        y, sr, duration, did_truncate = await load_audio(audio_file.file, max_duration=500)
+        effect_details = json.load(effects_file.file)
+        # effect_details = []
+        y_processed = await process_audio_with_effect_chain(y, sr, effect_details)
 
         return {
             "output_audio": y_processed,
@@ -45,12 +38,6 @@ async def apply_effect(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# Super temporary auth
-def verify_token(token: str):
-    if not token == os.environ.get("AUTH_TOKEN", "gr!m3s-fHsB-adVOf-grTK"):
-        raise HTTPException(status_code=401)
 
 
 # List all VST params
