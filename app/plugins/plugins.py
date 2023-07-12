@@ -24,7 +24,7 @@ def list_vst_files():
     result = [y for x in os.walk(PLUGINS_DIR) for y in glob.glob(os.path.join(x[0], '*.vst3'))]
     return result
 
-def validate_vsts(files, timeout_duration=15):
+def validate_vsts(files, timeout_duration=10):
     """
     Validates all plugins using `pluginval` application.
     """
@@ -49,9 +49,8 @@ def validate_vsts(files, timeout_duration=15):
     return valid_files
 
 def load_vsts(valid_files):
-    vst_files = list_vst_files()
     result = dict()
-    for file in vst_files:
+    for file in valid_files:
         key = os.path.basename(file)
         # load vst 
         val = VST(file)
