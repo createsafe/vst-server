@@ -62,6 +62,8 @@ async def process_audio_with_chain(
         y_bytes.seek(0)
         base64_encoded_audio = base64.b64encode(y_bytes.getvalue()).decode("utf-8")
 
+        sf.write("output.wav", y_output.T, sr)
+
         return base64_encoded_audio
     except Exception:
         raise ValueError("Failed to encode processed audio")

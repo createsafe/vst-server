@@ -71,7 +71,7 @@ class VST:
             for key, val in self.default_params.items():
                 setattr(self.plugin, key, val)
         except Exception:
-            print(f"Warning: Could not reset parameter {key} to value {val} in plugin {self.plugin.name}")
+            print(f"WARNING: Could not reset parameter {key} to value {val} in plugin {self.plugin.name}")
 
     def set_param(self, key: str, val: Any):
         """
@@ -114,7 +114,8 @@ class VST:
         except Exception as e:
             raise ValueError("Plugin failed to process audio:", e)
         finally:
-            self.reset_params()
+            # self.reset_params()
+            pass
 
         # Return processed audio
         return y_processed
