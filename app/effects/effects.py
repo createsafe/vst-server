@@ -17,39 +17,15 @@ async def apply_chain(
     chain: list,
 ) -> Tuple[ndarray[Any, dtype[float32]], int]:
     # iterate over effects in chain and apply to audio
-    for vst_details in chain:
-        vst_name = vst_details["plugin"]
-        vst = VST_LIST[vst_name]
+    for item in chain:
+        plugin_name = item["plugin"]
+        plugin = VST_LIST[plugin_name]
 
-        daw_params = vst_details["parameters"]
+        params = item["parameters"]
+        params = {param["name"]: param["value"] for param in params}
 
-        daw_params = {param["name"]: param["value"] for param in daw_params}
-
-        default_params = vst.default_params
-        daw2python_keys = {default_params[key]._AudioProcessorParameter__parameter_name: key for key in default_params}
-
-        # pack preset params
-        params = default_params
-        for daw_key in daw_params:
-            if daw_key in daw2python_keys:
-                python_key = daw2python_keys[daw_key]
-                value = daw_params[daw_key]
-
-                # check if string contains both digits and alphabetics
-                if is_alphanumeric(value):
-                    # try removing extraneous alphabetic characters
-                    value = remove_alphabetic(value)
-
-                # numbers converted to float before being converted to bool or int
-                if value.replace(".", "").isnumeric():
-                    value = float(value)
-
-                value = params[python_key].type(value)
-
-                print(f"{daw_key}: {value}")
-                setattr(vst.plugin, python_key, value)
-
-        y = await vst.process_audio(y, sr, params)
+        plugin.set_params(params)
+        y = await plugin.process_audio(y, sr)
 
     return y, sr
 
