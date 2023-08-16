@@ -1,4 +1,5 @@
 import json
+import dominate
 import os
 from pydantic import BaseModel
 import uvicorn
@@ -24,8 +25,8 @@ async def apply_effect(
 
     try:
         y, sr, duration, did_truncate = await load_audio(audio_file.file, max_duration=500)
-        effect_details = json.load(effects_file.file)
-        y_processed = await process_audio_with_chain(y, sr, effect_details)
+        effect_chain = json.load(effects_file.file)
+        y_processed = await process_audio_with_chain(y, sr, effect_chain)
 
         return {
             "output_audio": y_processed,
@@ -42,7 +43,14 @@ async def list_available_plugins():
     vst_list_json = [{"name" : key} for key in VST_LIST.keys()]
     vst_list_json = json.dumps(vst_list_json, indent=4)
     return vst_list_json
-        
+
+@app.get("/list_available_plugins_with_parameters", response_class=HTMLResponse)
+async def list_available_plugins_with_parameters():
+        plugin_names = [key for key in VST_LIST.keys()]
+        txt = ""
+        for name in plugin_names:
+            txt += await list_plugin_params(name)
+        return txt
 
 # List all VST params
 @app.get("/list_plugin_params/{plugin_name}", response_class=HTMLResponse)
@@ -53,19 +61,23 @@ async def list_plugin_params(plugin_name: str):
         params = plugin.get_params()
 
         # get params values as strings
+        params_list = list()
         for key, value in params.items():
-            params[key] = str(value)
+            # params[key] = str(value)
+            params_list.append({"name": key,
+                                "value": str(value)})
 
-        result = dict()
-        result["plugin name"] = plugin_name
-        result["parameters"] = params
+        plugin_details = dict()
+        plugin_details["plugin name"] = plugin_name
+        plugin_details["parameters"] = params_list
 
         # Return a prettified JSON response
         # params = json.dumps(params, indent=4)
-        result = json.dumps(result, indent=4)
-        prettified_json = "<h1>" + plugin_name + "</h1>" + "<pre>" + result + "</pre>"
+        plugin_details = json.dumps(plugin_details, indent=4)
 
-        return prettified_json
+        result = "<h1>" + plugin_name + "</h1>" + "<pre>" + plugin_details + "</pre>"
+
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
