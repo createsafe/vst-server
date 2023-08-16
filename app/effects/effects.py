@@ -30,7 +30,7 @@ async def apply_chain(
     return y, sr
 
 
-async def process_audio_with_effect_chain(
+async def process_audio_with_chain(
     y: ndarray[Any, dtype[float32]],
     sr: int,
     chain: dict

@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI, File, HTTPException, UploadFile, Header, Form
 from fastapi.responses import HTMLResponse
 
-from effects.effects import process_audio_with_effect_chain
+from effects.effects import process_audio_with_chain
 from plugins.plugins import VST_LIST
 from lib import load_audio
 
@@ -25,7 +25,7 @@ async def apply_effect(
     try:
         y, sr, duration, did_truncate = await load_audio(audio_file.file, max_duration=500)
         effect_details = json.load(effects_file.file)
-        y_processed = await process_audio_with_effect_chain(y, sr, effect_details)
+        y_processed = await process_audio_with_chain(y, sr, effect_details)
 
         return {
             "output_audio": y_processed,
@@ -56,15 +56,14 @@ async def list_plugin_params(plugin_name: str):
         for key, value in params.items():
             params[key] = str(value)
 
-        # result = list()
-        # result.append({"plugin_name", plugin_name})
-        # result.append(params)
-        
-        # result = json.dumps(params, indent=4)
+        result = dict()
+        result["plugin name"] = plugin_name
+        result["parameters"] = params
 
         # Return a prettified JSON response
-        params = json.dumps(params, indent=4)
-        prettified_json = "<h1>" + plugin_name + "</h1>" + "<pre>" + params + "</pre>"
+        # params = json.dumps(params, indent=4)
+        result = json.dumps(result, indent=4)
+        prettified_json = "<h1>" + plugin_name + "</h1>" + "<pre>" + result + "</pre>"
 
         return prettified_json
     except Exception as e:
