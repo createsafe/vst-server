@@ -17,7 +17,8 @@ class VST:
         path: str | Path,
         params: dict[str, AudioProcessorParameter | Any] | None = None,
     ):
-        plugin = load_plugin(str(path))
+        self.path = path
+        plugin = load_plugin(str(self.path))
         assert isinstance(plugin, VST3Plugin)
         self.plugin = plugin
 
