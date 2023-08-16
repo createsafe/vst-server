@@ -7,7 +7,6 @@ from fastapi.responses import HTMLResponse
 
 from effects.effects import process_audio_with_effect_chain
 from plugins.plugins import VST_LIST
-from plugins.utils import get_plugin_parameters
 from lib import load_audio
 
 app = FastAPI()
@@ -46,14 +45,26 @@ async def list_available_plugins():
         
 
 # List all VST params
-@app.get("/list_plugin_params/{plugin}", response_class=HTMLResponse)
-async def list_plugin_params(plugin: str):
+@app.get("/list_plugin_params/{plugin_name}", response_class=HTMLResponse)
+async def list_plugin_params(plugin_name: str):
     try:
-        params_json = await get_plugin_parameters(plugin)
-        params = json.loads(params_json)
+        # params_json = await get_plugin_parameters(plugin)
+        plugin = VST_LIST[plugin_name]
+        params = plugin.get_params()
+
+        # get params values as strings
+        for key, value in params.items():
+            params[key] = str(value)
+
+        # result = list()
+        # result.append({"plugin_name", plugin_name})
+        # result.append(params)
+        
+        # result = json.dumps(params, indent=4)
 
         # Return a prettified JSON response
-        prettified_json = "<pre>" + json.dumps(params, indent=4) + "</pre>"
+        params = json.dumps(params, indent=4)
+        prettified_json = "<h1>" + plugin_name + "</h1>" + "<pre>" + params + "</pre>"
 
         return prettified_json
     except Exception as e:
