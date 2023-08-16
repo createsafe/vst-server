@@ -42,7 +42,14 @@ async def list_available_plugins():
     vst_list_json = [{"name" : key} for key in VST_LIST.keys()]
     vst_list_json = json.dumps(vst_list_json, indent=4)
     return vst_list_json
-        
+
+@app.get("/list_available_plugins_with_parameters", response_class=HTMLResponse)
+async def list_available_plugins_with_parameters():
+        plugin_names = [key for key in VST_LIST.keys()]
+        txt = ""
+        for name in plugin_names:
+            txt += await list_plugin_params(name)
+        return txt
 
 # List all VST params
 @app.get("/list_plugin_params/{plugin_name}", response_class=HTMLResponse)
