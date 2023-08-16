@@ -46,26 +46,21 @@ class VST:
         self.default_params = plugin.parameters.copy()  # type: ignore
         self.name2parameter_map = {self.default_params[key]._AudioProcessorParameter__parameter_name: key for key in self.default_params}
 
+    def _get_parameter_type(self, parameter):
+        return self.default_params[parameter].type
+
     def set_params(self, params: dict[str, Any]) -> None:
         """
         Set the parameters of the plugin.
-        params: {"Parameter Name": "value", ...}
+        params: {"parameter_name": value, ...}
         """
-        for name in params:
-            if name in self.name2parameter_map:
-                internal_key = self.name2parameter_map[name]
-                value = params[name]
+        for name, value in params.items():
 
-                value = _condition_value(value)
-
-                # cast to parameter type
-                value = self.default_params[internal_key].type(value)
-
-                # set plugin attribute using reflexion
-                try:
-                    setattr(self.plugin, internal_key, value)
-                except Exception:
-                    print(f"WARNING: could not set parameter \"{internal_key}\" to value \"{value}\".")
+            try: 
+                value = self._get_parameter_type(name)(value)
+                setattr(self.plugin, name, value)
+            except Exception:
+                print(f"WARNING: could not set parameter \"{name}\" to value \"{value}\".")
 
     def reset_params(self) -> None:
         """
