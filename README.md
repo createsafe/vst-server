@@ -26,3 +26,6 @@ Start the server by running the following command.
 ```console
 python3 app/server.py
 ```
+
+## Adding audio effects
+Audio effects are stored as VSTs and loaded from the `PLUGIN_DIR` defined in `app/config.py`. 
