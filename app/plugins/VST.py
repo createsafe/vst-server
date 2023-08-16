@@ -85,6 +85,15 @@ class VST:
         # Get the python name of the parameter if we're using the raw name
         self.set_params({key, val})
 
+    def get_params(self):
+        """
+        Returns a dict with the parameters and their values
+        """
+        params = dict()
+        for value in self.name2parameter_map.values():
+            params[value] = getattr(self.plugin, value)
+        return params
+
     async def process_audio(
         self,
         y: ndarray[Any, dtype[float32]],
